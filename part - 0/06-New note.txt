@@ -1,0 +1,14 @@
+note over Browser:
+user input
+end note
+Browser->Server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+note over Server:
+Server adds request note to
+notes array and sends back a message to the browser (note created)
+end note
+Server-->Browser: HTTP Status Code 201, Created
+Server-->Browser: {"message":"note created"}
+note over Browser:
+The request handler checks if the add is succeded 
+and adds the note to the frontend array/list
+end note

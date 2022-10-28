@@ -1,0 +1,24 @@
+note over Browser:
+user input
+end note
+Browser->Server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note
+note over Server:
+Server will validate the data and eventualy add it to the database
+end note
+Server-->Browser: HTTP Status 302 - Redirect to /notes
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/notes
+Server-->Browser: HTML code
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
+Server-->Browser: main.css
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
+Server-->Browser: main.js
+note over Browser:
+Browser will execute main.js that requests 
+JSON (data.json)  data from server 
+end note
+Browser->Server: HTTP GET https://fullstack-exampleapp.herokuapp.com/data.json
+Server-->Browser: [{"content":"i","date":"2022-10-27T16:03:43.813Z},{},...]
+note over Browser:
+browser executes the event handler
+that renders notes to display
+end note
