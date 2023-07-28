@@ -1,40 +1,54 @@
 import { useState } from 'react'
 
-const Title = ({ name }) => <h1>{ name }</h1>
+const Header = ({ text }) => <h1>{ text }</h1>
 
-const Button = ({handleClick, name}) => <button onClick={handleClick}>{ name }</button>
+const Button = ({handleClick, text}) => <button onClick={handleClick}>{ text }</button>
 
-const Score = ({name, score}) => <div>{ name }: { score }</div>
+const StatisticLine = ({text, value}) => {
+  return (
+    <tr>
+      <td>
+        {text}
+      </td>
+      <td>
+        {value}
+      </td>
+    </tr>
+  )
+}
 
 const Statistics = (props) => {
   const good = props.good
   const neutral = props.neutral
   const bad = props.bad
 
-  const all = good + neutral + bad
-  const average = all > 0 ? (good - bad) / all : 0
-  const percentage = all > 0 ? (good / all) * 100 : 0
+  const total = good + neutral + bad
+  const average = total > 0 ? (good - bad) / total : 0
+  const percentage = total > 0 ? (good / total) * 100 : 0
 
-  if (all > 0) {
+  if (total === 0) {
     return (
-      <div>
-        <Title name="statistics"></Title>
-  
-        <Score name="Good" score={good}></Score>
-        <Score name="Neutral" score={neutral}></Score>
-        <Score name="Bad" score={bad}></Score>
-        <Score name="All" score={all}></Score>
-        <Score name="Avarage" score={average}></Score>
-        <Score name="Positive" score={percentage + ' %'}></Score>
-      </div>
+      <p>
+        No feedback given
+      </p>
     )
   }
   
   return (
-    <p>
-      No feedback given
-    </p>
-    
+    <div>
+      <Header text="statistics"></Header>
+
+      <table>
+        <tbody>
+          <StatisticLine text="Good" value={good}></StatisticLine>
+          <StatisticLine text="Neutral" value={neutral}></StatisticLine>
+          <StatisticLine text="Bad" value={bad}></StatisticLine>
+          <StatisticLine text="All" value={total}></StatisticLine>
+          <StatisticLine text="Avarage" value={average}></StatisticLine>
+          <StatisticLine text="Positive" value={percentage + ' %'}></StatisticLine>
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -56,11 +70,11 @@ const App = () => {
 
   return (
     <div>
-      <Title name="give feedback"></Title>
+      <Header text="give feedback"></Header>
 
-      <Button name="good" handleClick={increaseGood}></Button>
-      <Button name="neutral" handleClick={increaseNeutral}></Button>
-      <Button name="bad" handleClick={increaseBad}></Button>
+      <Button text="good" handleClick={increaseGood}></Button>
+      <Button text="neutral" handleClick={increaseNeutral}></Button>
+      <Button text="bad" handleClick={increaseBad}></Button>
 
       <Statistics good={good} neutral={neutral} bad={bad}></Statistics>
     </div>
