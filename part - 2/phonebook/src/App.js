@@ -3,7 +3,10 @@ import Persons from './components/Persons'
 import Header from './components/Header'
 import AddPerson from './components/PersonForm'
 import Filter from './components/Filter'
-import axios from 'axios'
+import personService from './services/personService'
+
+import './index.css'
+import Notification from './components/Notifications'
 
 const emptyPerson = {
   name: '',
@@ -14,27 +17,57 @@ const App = () => {
   const [persons, setPersons] = useState([])
   const [newPerson, setNewPerson] = useState({...emptyPerson})
   const [filter, setFilter] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState()
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3010/persons')
-      .then(response => {
-        setPersons(response.data)
+    personService
+      .getAll()
+      .then(persons => {
+        setPersons(persons)
       })
   }, [])
 
   const addPerson = (event) => {
     event.preventDefault()  
     
-    const existingPerson = persons.filter((person) =>
+    const existingPerson = persons.find((person) =>
         person.name === newPerson.name
     )
 
-    if (existingPerson.length === 0) {
-      setPersons(persons.concat(newPerson))
-      setNewPerson({...emptyPerson})
+    if (!existingPerson) {
+      personService
+        .create(newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+          setNewPerson({...emptyPerson})
+          showMessage(`Added ${returnedPerson.name}`)
+        })
     } else {
-      window.alert(`${newPerson.name} is already added to the phonebook`)
+      if (window.confirm(`${existingPerson.name} is already added to the phonebook, replace the old number with a new one?`)) {
+        personService
+          .update(existingPerson.id, {...existingPerson, number: newPerson.number})
+          .then(returnedPerson => {
+            setPersons(persons.map(x => x.id !== existingPerson.id ? x : returnedPerson))
+            setNewPerson({...emptyPerson})
+            showMessage(`Updated ${returnedPerson.name}`)
+          })
+      }
+    }
+  }
+
+  const deletePerson = (id) => {
+    const person = persons.find(x => x.id === id)
+
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personService
+        .deletePerson(id)
+        .then(() => {
+          setPersons(persons.filter(x => x.id !== id))
+          showMessage(`Removed ${person.name}`)
+        })
+        .catch(() => {
+          showMessage(`Information of ${person.name} has already been removed from the server`, false)
+        })
     }
   }
 
@@ -50,12 +83,21 @@ const App = () => {
     setFilter(event.target.value)
   }
 
+  const showMessage = (message, success = true) => {
+    setNotificationMessage({ message, success })
+
+    setTimeout(() => {
+      setNotificationMessage()
+    }, 5000)
+  }
+
   const personsToShow = filter !== '' ? 
     persons.filter(person => person.name.toLocaleLowerCase().startsWith(filter.toLocaleLowerCase()) ) : persons 
 
   return (
     <div>
       <Header text="Phonebook"/>
+      <Notification message={notificationMessage?.message} success={notificationMessage?.success}></Notification>
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
 
       <Header text="Add person"/>
@@ -65,7 +107,7 @@ const App = () => {
         handlePersonNumberChange={handlePersonNumberChange}/>
       
       <Header text="Numbers"/>
-      <Persons persons={personsToShow} />
+      <Persons persons={personsToShow} deletePerson={deletePerson}/>
     </div>
   )
 }
