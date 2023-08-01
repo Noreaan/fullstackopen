@@ -1,2 +1,0 @@
-# fullstackopen
-Learning React, Nodejs
